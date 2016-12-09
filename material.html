@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Google Calendar Timesheets</title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css" />
+</head>
+<body ng-app="app" ng-cloak layout="column" ng-controller="MainCtrl">
+    <md-toolbar layout="row" class="md-toolbar-tools">
+        <h1>Google Calendar Timesheets</h1>
+    </md-toolbar>
+    <md-content flex layout-padding ng-show="!user">
+        <section>
+            <h2 class="md-headline">Login</h2>
+            <p class="md-body-1">Please log into your Google Account to continue</p>
+            <md-button class="md-raised" ng-click="login()">Login</md-button>
+        </section>
+    </md-content>
+    <md-content flex layout-padding ng-show="user">
+        <section>
+            <h2 class="md-headline">Agenda</h2>
+            <md-list flex>
+                <md-list-item class="md-3-line" ng-repeat="event in calendar.events">
+                    <img ng-src="{{item.face}}?{{$index}}" class="md-avatar" alt="{{item.who}}" />
+                    <div class="md-list-item-text" layout="column">
+                        <h3>{{ event.summary }}</h3>
+                        <h4>{{ item.what }}</h4>
+                        <p>{{ item.notes }}</p>
+                    </div>
+                </md-list-item>
+                <md-divider ></md-divider>
+            </md-list>
+        </section>
+    </md-content>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.js"></script>
+    <script src="//maximepvrt.github.io/angular-google-gapi/bower_components/angular-google-gapi/dist/angular-google-gapi.js"></script>
+    <script src="material.js"></script>
+</body>
+</html>
