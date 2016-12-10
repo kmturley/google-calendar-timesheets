@@ -17,22 +17,19 @@ angular.module('app', ['ngMaterial', 'angular-google-gapi'])
 
     .factory('Calendar', ['GApi', 'orderByFilter', function(GApi, orderByFilter) {
         return {
+            dayStart: new Date(),
             events: [],
             reports: [],
             getEvents: function () {
                 var me = this;
-                var todayStart = new Date();
-                todayStart.setHours(0);
-                todayStart.setMinutes(0);
-                todayStart.setSeconds(0);
-                var todayEnd = new Date();
-                todayEnd.setHours(24);
-                todayEnd.setMinutes(0);
-                todayEnd.setSeconds(0);
+                this.dayStart.setHours(0);
+                this.dayStart.setMinutes(0);
+                this.dayStart.setSeconds(0);
+                this.dayEnd = new Date(this.dayStart.getFullYear(), this.dayStart.getMonth(), this.dayStart.getDate(), 24, 0, 0);
                 var params = {
                     'calendarId': 'primary',
-                    'timeMin': todayStart.toISOString(),
-                    'timeMax': todayEnd.toISOString(),
+                    'timeMin': this.dayStart.toISOString(),
+                    'timeMax': this.dayEnd.toISOString(),
                     'singleEvents': true,
                     'orderBy': 'startTime'
                 };
@@ -93,6 +90,20 @@ angular.module('app', ['ngMaterial', 'angular-google-gapi'])
             });
         };
 
+        $scope.loadDate = function(date, measure) {
+            Calendar.dayStart = new Date(date.getTime() + (measure * 1000 * 60 * 60 * 24));
+            $scope.onDateChange();
+        };
+
+        $scope.onDateChange = function () {
+            if ($scope.timeout) {
+                $timeout.cancel($scope.timeout);
+            }
+            $scope.timeout = $timeout(function() {
+                Calendar.getEvents();
+            }, 500);
+        };
+
         $scope.onChange = function(event) {
             if (event.code) {
                 event.summary = '[' + event.code + '] ' + event.name;
@@ -104,7 +115,7 @@ angular.module('app', ['ngMaterial', 'angular-google-gapi'])
             }
             $scope.timeout = $timeout(function() {
                 Calendar.saveEvent(event);
-            }, 1000);
+            }, 500);
         };
 
         $scope.downloadReport = function() {
