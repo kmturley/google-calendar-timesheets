@@ -6,21 +6,32 @@
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css" />
-    <link rel="stylesheet" href="material.css" />
+    <link rel="stylesheet" href="components/material.css" />
 </head>
-<body ng-app="app" ng-cloak layout="column" ng-controller="MainCtrl">
-    <a href="https://github.com/kmturley/google-calendar-timesheets" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0; z-index: 10; width: 120px;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+<body ng-app="All" ng-cloak layout="column" ng-controller="Main">
+    <a href="https://github.com/kmturley/google-calendar-timesheets" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0; z-index: 10;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
     <md-toolbar layout="row" class="md-toolbar-tools">
         <h1>Google Calendar Timesheets</h1>
     </md-toolbar>
-    <md-content flex layout-padding ng-show="!user">
+    <md-content flex layout-padding ng-show="!auth.user">
         <section>
             <h2 class="md-headline">Login</h2>
             <p class="md-body-1">Please log into your Google Account to continue</p>
-            <md-button class="md-raised md-primary" ng-click="login()">Login</md-button>
+            <md-button class="md-raised md-primary" ng-click="auth.login()">Login</md-button>
         </section>
     </md-content>
-    <md-content flex layout-padding ng-if="user">
+    <md-content flex layout-padding ng-if="auth.user">
+        <section class="user">
+            <md-list flex>
+                <md-list-item class="md-2-line">
+                    <img ng-src="{{ auth.user.picture }}" class="md-avatar" alt="{{ auth.user.name }}" />
+                    <div class="md-list-item-text">
+                        <h3>{{ auth.user.name }}</h3>
+                        <p><a href="#" ng-click="auth.logout()">Logout</a></p>
+                    </div>
+                </md-list-item>
+            </md-list>
+        </section>
         <section class="agenda">
             <div class="agenda-head" layout="row">
                 <h2 class="md-headline" flex>Agenda</h2>
@@ -31,7 +42,7 @@
                 </div>
             </div>
             <md-list>
-                <md-list-item ng-repeat="event in calendar.events">
+                <md-list-item class="list-item" ng-repeat="event in calendar.events">
                     <p class="event-time">
                         {{ event.start.dateTime || event.start.date | date: "h:mma" }}
                     </p>
@@ -52,7 +63,7 @@
                 <md-button class="md-raised md-primary" ng-click="downloadReport()">Download</md-button>
             </div>
             <md-list>
-                <md-list-item ng-repeat="report in calendar.reports">
+                <md-list-item class="list-item" ng-repeat="report in calendar.reports">
                     <p class="report-total">
                         <ng-pluralize count="report.total" when="{'0': 'none','1':'{} hr','other':'{} hrs'}"></ng-pluralize>
                     </p>
@@ -71,8 +82,11 @@
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
-    <script src="//maximepvrt.github.io/angular-google-gapi/bower_components/angular-google-gapi/dist/angular-google-gapi.min.js"></script>
-    <script src="csv.min.js"></script>
-    <script src="material.js"></script>
+    <script src="libs/angular-google-gapi.min.js"></script>
+    <script src="libs/csv.min.js"></script>
+    <script src="components/All.js"></script>
+    <script src="components/Auth.js"></script>
+    <script src="components/Calendar.js"></script>
+    <script src="components/Main.js"></script>
 </body>
 </html>
