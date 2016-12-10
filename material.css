@@ -1,0 +1,38 @@
+md-list-item {
+    background-color: #fff;
+    box-shadow: 0 -1px 0 #e0e0e0,0 0 2px rgba(0,0,0,.12),0 2px 4px rgba(0,0,0,.24);
+}
+
+md-input-container {
+    margin: 0;
+}
+
+.md-errors-spacer {
+    min-height: 0 !important;
+}
+
+/* agenda */
+
+.agenda .event-time,
+.agenda .event-code  {
+    flex: 0 0 6em;
+}
+
+.agenda .event-name {
+    padding-left: 2em;
+}
+
+/* report */
+
+.report .report-head h2 {
+    line-height: 0;
+}
+
+.report .report-total,
+.report .report-code  {
+    flex: 0 0 6em;
+}
+
+.report .report-name {
+    padding-left: 2em;
+}
