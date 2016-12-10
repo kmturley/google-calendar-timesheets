@@ -6,7 +6,6 @@ angular.module('app', ['ngMaterial', 'angular-google-gapi'])
             GAuth.setClient(CLIENT);
             GAuth.setScope('https://www.googleapis.com/auth/calendar');
             GAuth.checkAuth().then(function(user) {
-                    console.log('run.loggedin', user);
                     $rootScope.user = user;
                     Calendar.getEvents();
                 }, function() {
@@ -16,12 +15,12 @@ angular.module('app', ['ngMaterial', 'angular-google-gapi'])
         }
     ])
 
-    .factory('Calendar', ['GApi', function(GApi) {
+    .factory('Calendar', ['GApi', 'orderByFilter', function(GApi, orderByFilter) {
         return {
             events: [],
+            reports: [],
             getEvents: function () {
                 var me = this;
-                console.log('getEvents');
                 var todayStart = new Date();
                 todayStart.setHours(0);
                 todayStart.setMinutes(0);
@@ -38,28 +37,90 @@ angular.module('app', ['ngMaterial', 'angular-google-gapi'])
                     'orderBy': 'startTime'
                 };
                 GApi.execute('calendar', 'events.list', params).then(function(resp) {
-                    console.log('getEvents.success', resp);
+                    var totals = {};
+                    angular.forEach(resp.items, function(item) {
+                        var split = item.summary.split(/\[(.*?)\]/g);
+                        var dateStart = new Date(item.start.dateTime || item.start.date);
+                        var dateEnd = new Date(item.end.dateTime || item.end.date);
+                        var dateLength = (dateEnd - dateStart) / 1000 / 60 / 60;
+                        item.code = split[1];
+                        item.name = split[2] || item.summary;
+                        if (!totals[item.code]) {
+                            totals[item.code] = {
+                                code: item.code || 'unknown',
+                                name: item.name,
+                                total: dateLength
+                            };
+                        } else {
+                            totals[item.code].total += dateLength;
+                        }
+                    })
+                    var list = [];
+                    angular.forEach(totals, function(total) {
+                        list.push(total);
+                    });
                     me.events = resp.items;
+                    me.reports = orderByFilter(list, 'total', true);
                 }, function(e) {
                     console.log('getEvents.error', e);
+                });
+            },
+            saveEvent: function (event) {
+                var me = this;
+                var params = {
+                    calendarId: 'primary',
+                    eventId: event.id,
+                    resource: event
+                };
+                GApi.execute('calendar', 'events.update', params).then(function(resp) {
+                    me.getEvents();
+                }, function(e) {
+                    console.log('saveEvent.error', e);
                 });
             }
         };
     }])
 
-    .controller('MainCtrl', ['$scope', 'GAuth', 'Calendar', function($scope, GAuth, Calendar) {
-        console.log('MainCtrl');
-
+    .controller('MainCtrl', ['$scope', 'GAuth', 'Calendar', '$timeout', function($scope, GAuth, Calendar, $timeout) {
         $scope.calendar = Calendar;
 
         $scope.login = function() {
-            console.log('login');
             GAuth.login().then(function(user) {
-                console.log('login.success', user);
                 $scope.user = user;
                 Calendar.getEvents();
             }, function(e) {
                 console.log('login.error', e);
             });
+        };
+
+        $scope.onChange = function(event) {
+            if (event.code) {
+                event.summary = '[' + event.code + '] ' + event.name;
+            } else {
+                event.summary = event.name;
+            }
+            if ($scope.timeout) {
+                $timeout.cancel($scope.timeout);
+            }
+            $scope.timeout = $timeout(function() {
+                Calendar.saveEvent(event);
+            }, 1000);
+        };
+
+        $scope.downloadReport = function() {
+            var data = angular.copy(Calendar.reports);
+            data.unshift({
+                code: 'Code',
+                name: 'Name',
+                total: 'Hours'
+            });
+            var content = new CSV(data).encode();
+            console.log('downloadReport', content);
+            var a = document.createElement('a');
+            a.href = 'data:text/csv,' + encodeURIComponent(content);
+            a.setAttribute('download', 'report.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         };
     }]);
