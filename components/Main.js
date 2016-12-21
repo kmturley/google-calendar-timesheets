@@ -14,8 +14,12 @@ angular.module('Main', [])
                 $timeout.cancel($scope.timeout);
             }
             $scope.timeout = $timeout(function() {
-                Calendar.getEvents();
+                Calendar.getEvents($scope.auth.user.email);
             }, 500);
+        };
+
+        $scope.onItemClick = function(event) {
+            event.stopPropagation();
         };
 
         $scope.onChange = function(event) {
@@ -49,10 +53,10 @@ angular.module('Main', [])
             document.body.removeChild(a);
         };
 
-        // $rootScope.$watch('user', function(newValue, oldValue) {
-        //     console.log('watch', newValue);
-        //     if (newValue) {
-        //         Calendar.getEvents();
-        //     }
-        // });
+        $scope.$watch('auth.user', function(newValue, oldValue) {
+            console.log('auth.user', newValue);
+            if (newValue) {
+                Calendar.getEvents($scope.auth.user.email);
+            }
+        });
     }]);

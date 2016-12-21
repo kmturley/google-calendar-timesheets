@@ -1,18 +1,19 @@
 angular.module('Calendar', [])
 
-    .factory('Calendar', ['GApi', 'orderByFilter', function(GApi, orderByFilter) {
+    .factory('Calendar', ['GApi', '$filter', function(GApi, $filter) {
         return {
             dayStart: new Date(),
+            dayEnd: new Date(),
             events: [],
             reports: [],
             init: function() {
                 GApi.load('calendar','v3');
-            },
-            getEvents: function () {
-                var me = this;
                 this.dayStart.setHours(0);
                 this.dayStart.setMinutes(0);
                 this.dayStart.setSeconds(0);
+            },
+            getEvents: function (email) {
+                var me = this;
                 this.dayEnd = new Date(this.dayStart.getFullYear(), this.dayStart.getMonth(), this.dayStart.getDate(), 24, 0, 0);
                 var params = {
                     'calendarId': 'primary',
@@ -22,30 +23,41 @@ angular.module('Calendar', [])
                     'orderBy': 'startTime'
                 };
                 GApi.execute('calendar', 'events.list', params).then(function(resp) {
+                    var items = [];
                     var totals = {};
                     angular.forEach(resp.items, function(item) {
+                        item.attendee = true;
+                        if (item.attendees) {
+                            var attendee = $filter('filter')(item.attendees, {email: email})[0];
+                            if (attendee) {
+                                item.included = attendee.responseStatus === 'accepted' ? true : false;
+                            }
+                        }
                         var split = item.summary.split(/\[(.*?)\]/g);
                         var dateStart = new Date(item.start.dateTime || item.start.date);
                         var dateEnd = new Date(item.end.dateTime || item.end.date);
                         var dateLength = (dateEnd - dateStart) / 1000 / 60 / 60;
                         item.code = split[1];
                         item.name = split[2] || item.summary;
-                        if (!totals[item.code]) {
-                            totals[item.code] = {
-                                code: item.code || 'unknown',
-                                name: item.name,
-                                total: dateLength
-                            };
-                        } else {
-                            totals[item.code].total += dateLength;
+                        items.push(item);
+                        if (item.included) {
+                            if (!totals[item.code]) {
+                                totals[item.code] = {
+                                    code: item.code || 'unknown',
+                                    name: item.name,
+                                    total: dateLength
+                                };
+                            } else {
+                                totals[item.code].total += dateLength;
+                            }
                         }
                     })
-                    var list = [];
+                    var sorted = [];
                     angular.forEach(totals, function(total) {
-                        list.push(total);
+                        sorted.push(total);
                     });
-                    me.events = resp.items;
-                    me.reports = orderByFilter(list, 'total', true);
+                    me.events = items;
+                    me.reports = $filter('orderBy')(sorted, 'total', true);
                 }, function(e) {
                     console.log('getEvents.error', e);
                 });

@@ -9,9 +9,13 @@
     <link rel="stylesheet" href="components/material.css" />
 </head>
 <body ng-app="All" ng-cloak layout="column" ng-controller="Main">
-    <a href="https://github.com/kmturley/google-calendar-timesheets" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0; z-index: 10;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+    <!--<a href="https://github.com/kmturley/google-calendar-timesheets" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0; z-index: 10;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>-->
     <md-toolbar layout="row" class="md-toolbar-tools">
         <h1>Google Calendar Timesheets</h1>
+        <span flex></span>
+        <md-button class="md-fab md-mini" aria-label="Favorite" ng-if="auth.user">
+            <img ng-src="{{ auth.user.picture }}" alt="{{ auth.user.name }}" />
+        </md-button>
     </md-toolbar>
     <md-content flex layout-padding ng-show="!auth.user">
         <section>
@@ -21,17 +25,6 @@
         </section>
     </md-content>
     <md-content flex layout-padding ng-if="auth.user">
-        <section class="user">
-            <md-list flex>
-                <md-list-item class="md-2-line">
-                    <img ng-src="{{ auth.user.picture }}" class="md-avatar" alt="{{ auth.user.name }}" />
-                    <div class="md-list-item-text">
-                        <h3>{{ auth.user.name }}</h3>
-                        <p><a href="#" ng-click="auth.logout()">Logout</a></p>
-                    </div>
-                </md-list-item>
-            </md-list>
-        </section>
         <section class="agenda">
             <div class="agenda-head" layout="row">
                 <h2 class="md-headline" flex>Agenda</h2>
@@ -42,15 +35,14 @@
                 </div>
             </div>
             <md-list>
-                <md-list-item class="list-item" ng-repeat="event in calendar.events">
+                <md-list-item class="list-item" ng-repeat="event in calendar.events" ng-click="onItemClick($event)">
+                    <md-checkbox ng-model="event.included" aria-label="Going"></md-checkbox>
                     <p class="event-time">
                         {{ event.start.dateTime || event.start.date | date: "h:mma" }}
                     </p>
-                    <p class="event-code">
-                        <md-input-container md-no-float>
-                            <input ng-model="event.code" ng-change="onChange(event)" placeholder="J1" />
-                        </md-input-container>
-                    </p>
+                    <md-input-container md-no-float class="event-code">
+                        <input ng-model="event.code" ng-change="onChange(event)" placeholder="J1" />
+                    </md-input-container>
                     <p class="event-name">
                         {{ event.name }}
                     </p>

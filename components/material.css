@@ -1,3 +1,10 @@
+/* nav */
+
+.md-toolbar-tools .md-fab img {
+    margin-left: -7px;
+    width: 150%;
+}
+
 .list-item {
     background-color: #fff;
     box-shadow: 0 -1px 0 #e0e0e0,0 0 2px rgba(0,0,0,.12),0 2px 4px rgba(0,0,0,.24);
@@ -36,6 +43,10 @@
 
 .agenda .md-fab:hover {
     background-color: #ddd !important;
+}
+
+.agenda .list-item .md-ripple-container {
+    display: none;
 }
 
 .agenda .agenda-head h2 {

@@ -7,11 +7,10 @@ angular.module('Auth', [])
                 var me = this;
                 var CLIENT = '794593620611-ed2tdnf8lsrvbmr8iu7urs5tntp2bpgi.apps.googleusercontent.com';
                 GAuth.setClient(CLIENT);
-                GAuth.setScope('https://www.googleapis.com/auth/calendar');
+                GAuth.setScope('https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar');
                 GAuth.checkAuth().then(function(user) {
                         console.log('init.success', user);
                         me.user = user;
-                        Calendar.getEvents();
                     }, function() {
                         console.log('init.error');
                     }
@@ -22,7 +21,6 @@ angular.module('Auth', [])
                 GAuth.login().then(function(user) {
                     console.log('login.success', user);
                     me.user = user;
-                    Calendar.getEvents();
                 }, function(e) {
                     console.log('login.error', e);
                 });
