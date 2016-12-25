@@ -6,6 +6,7 @@ angular.module('Calendar', [])
             dayEnd: new Date(),
             events: [],
             reports: [],
+            hours: 0,
             init: function() {
                 GApi.load('calendar','v3');
                 this.dayStart.setHours(0);
@@ -24,9 +25,12 @@ angular.module('Calendar', [])
                 };
                 GApi.execute('calendar', 'events.list', params).then(function(resp) {
                     var items = [];
-                    var totals = {};
                     angular.forEach(resp.items, function(item) {
-                        item.attendee = true;
+                        // if user is the organizer, include in report
+                        if (item.organizer && item.organizer.email === email) {
+                            item.included = true;
+                        }
+                        // if user is an attendee, include in report
                         if (item.attendees) {
                             var attendee = $filter('filter')(item.attendees, {email: email})[0];
                             if (attendee) {
@@ -34,33 +38,45 @@ angular.module('Calendar', [])
                             }
                         }
                         var split = item.summary.split(/\[(.*?)\]/g);
-                        var dateStart = new Date(item.start.dateTime || item.start.date);
-                        var dateEnd = new Date(item.end.dateTime || item.end.date);
-                        var dateLength = (dateEnd - dateStart) / 1000 / 60 / 60;
                         item.code = split[1];
                         item.name = split[2] || item.summary;
                         items.push(item);
-                        if (item.included) {
-                            if (!totals[item.code]) {
-                                totals[item.code] = {
-                                    code: item.code || 'unknown',
-                                    name: item.name,
-                                    total: dateLength
-                                };
-                            } else {
-                                totals[item.code].total += dateLength;
-                            }
-                        }
-                    })
-                    var sorted = [];
-                    angular.forEach(totals, function(total) {
-                        sorted.push(total);
                     });
                     me.events = items;
-                    me.reports = $filter('orderBy')(sorted, 'total', true);
+                    me.updateReport();
+                    console.log('getEvents', me.events);
                 }, function(e) {
                     console.log('getEvents.error', e);
                 });
+            },
+            updateReport: function () {
+                var me = this;
+                var totals = {};
+                var hours = 0;
+                angular.forEach(me.events, function(item) {
+                    if (item.included) {
+                        var dateStart = new Date(item.start.dateTime || item.start.date);
+                        var dateEnd = new Date(item.end.dateTime || item.end.date);
+                        var dateLength = (dateEnd - dateStart) / 1000 / 60 / 60;
+                        if (!totals[item.code]) {
+                            totals[item.code] = {
+                                code: item.code || 'unknown',
+                                name: item.name,
+                                total: dateLength
+                            };
+                        } else {
+                            totals[item.code].total += dateLength;
+                        }
+                        hours += dateLength;
+                    }
+                });
+                var array = [];
+                angular.forEach(totals, function(total) {
+                    array.push(total);
+                });
+                me.hours = hours;
+                me.reports = $filter('orderBy')(array, 'total', true);
+                console.log('updateReport', me.hours, me.reports);
             },
             saveEvent: function (event) {
                 var me = this;

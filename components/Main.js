@@ -22,6 +22,10 @@ angular.module('Main', [])
             event.stopPropagation();
         };
 
+        $scope.onCheckbox = function (event) {
+            Calendar.updateReport();
+        };
+
         $scope.onChange = function(event) {
             if (event.code) {
                 event.summary = '[' + event.code + '] ' + event.name;

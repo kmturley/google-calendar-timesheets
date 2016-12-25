@@ -5,6 +5,7 @@
     <title>Google Calendar Timesheets</title>
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons" />
     <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css" />
     <link rel="stylesheet" href="components/material.css" />
 </head>
@@ -29,14 +30,20 @@
             <div class="agenda-head" layout="row">
                 <h2 class="md-headline" flex>Agenda</h2>
                 <div class="agenda-date">
-                    <md-button class="md-fab" ng-click="loadDate(calendar.dayStart, -1)">&lt;</md-button>
+                    <md-button class="md-fab" ng-click="loadDate(calendar.dayStart, -1)">
+                        <i class="material-icons">chevron_left</i>
+                    </md-button>
                     <md-datepicker ng-model="calendar.dayStart" ng-change="onDateChange()" md-placeholder="Enter date"></md-datepicker>
-                    <md-button class="md-fab" ng-click="loadDate(calendar.dayStart, 1)">&gt;</md-button>
+                    <md-button class="md-fab" ng-click="loadDate(calendar.dayStart, 1)">
+                        <i class="material-icons">chevron_right</i>
+                    </md-button>
                 </div>
             </div>
             <md-list>
                 <md-list-item class="list-item" ng-repeat="event in calendar.events" ng-click="onItemClick($event)">
-                    <md-checkbox ng-model="event.included" aria-label="Going"></md-checkbox>
+                    <p class="event-included">
+                        <i class="material-icons" ng-if="event.included">check</i>
+                    </p>
                     <p class="event-time">
                         {{ event.start.dateTime || event.start.date | date: "h:mma" }}
                     </p>
@@ -67,6 +74,7 @@
                     </p>
                 </md-list-item>
             </md-list>
+            <p><ng-pluralize count="calendar.hours" when="{'0': 'none','1':'{} hr','other':'{} hrs'}"></ng-pluralize> total</p>
         </section>
     </md-content>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>

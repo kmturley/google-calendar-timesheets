@@ -24,10 +24,10 @@
     background: transparent !important;
     box-shadow: none;
     color: #666;
-    line-height: 30px;
-    width: 30px;
-    height: 30px;
-    padding: 0;
+    line-height: 0;
+    height: auto;
+    width: auto;
+    padding: 5px;
     margin: 0;
     min-width: 0;
     min-height: 0;
@@ -51,6 +51,14 @@
 
 .agenda .agenda-head h2 {
     line-height: 0;
+}
+
+.agenda .event-included {
+    flex: 0 0 2.5em;
+}
+
+.agenda .event-included .material-icons {
+    vertical-align: sub;
 }
 
 .agenda .event-time,
